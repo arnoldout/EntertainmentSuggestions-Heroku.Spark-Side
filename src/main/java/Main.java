@@ -5,17 +5,16 @@ import static spark.Spark.*;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.Charset;
-import java.util.Calendar;
+import java.util.concurrent.*;
 import org.json.*;
 
 public class Main {
     public static void main(String[] args) {
-    	port(Integer.valueOf(System.getenv("PORT")));
-    	Movie m = new Movie(new int[]{18,28,80,53},7, 211, 132);
+    	//port(Integer.valueOf(System.getenv("PORT")));
+    	//Movie m = new Movie(new int[]{18,28,80,53},7, 211, 132);
     	get("/", (request, response) -> 
     	{
-    		String s = algorithm(m);
-    		return "Message: "+s;
+    		return "Message: ";
 		});
     	
         get("/search/movie/:movieName", (request, response) -> 
@@ -42,40 +41,19 @@ public class Main {
             movie.setVoteAvg(movie.getVoteAvg(s));
             movie.setActor(movie.getActor(s));
             movie.setDirector(movie.getDirector(s));
-            return "movie: " + movie.toString();//s.toString();
+            QueryBuilder qb = new QueryBuilder(movie);
+            Query arr[] = qb.getQueries(); 
+            //ExecutorService executor = Executors.newFixedThreadPool(arr.length);
+            for(int i=0; i<arr.length; i++)
+            {
+            	//using threads, score results in the threads
+            	
+            }
+            
+            return "movie: "+arr.toString();//s.toString();
     	});
     }
-
-	
-    
-    public static String algorithm(Movie m)
-    {
-    	String baseUri = "http://api.themoviedb.org/3/discover/movie?";
-
-    	//request genre movies with director
-    	//request genre movies with Lead actor
-    	//request genre movies with similar age
-    	//request genre movies with similar id
-    	//String genres = "with_genres="+genres(m.getGenres());
-    	//String years = "&year="+dates(2014);
-    	String apiKey = "&api_key=c2dcd458445148b91ed151b2a41a3c22";
-    	try {
-			//JSONObject q = readJsonFromUrl(baseUri+genres+years+apiKey);
-			//return q.toString();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-    	return"";// baseUri+genres+years+apiKey;  	
-    	//building query 
-    	//year=2008&with_genres=18|28|80|53&with_people=3894
-    	//score results
-    	//return list of 10 best results
-    	//JSONify and send to requester
-    }
-    
-    
-    
+     
     public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
         InputStream is = new URL(url).openStream();
         try {
