@@ -42,12 +42,14 @@ public class Main {
             movie.setActor(movie.getActor(s));
             movie.setDirector(movie.getDirector(s));
             QueryBuilder qb = new QueryBuilder(movie);
+            ConcurrentHashMap<Integer, JSONObject> jsonMap = new ConcurrentHashMap<>();
             Query arr[] = qb.getQueries(); 
-            //ExecutorService executor = Executors.newFixedThreadPool(arr.length);
+            ExecutorService executor = Executors.newFixedThreadPool(arr.length);
             for(int i=0; i<arr.length; i++)
             {
             	//using threads, score results in the threads
-            	
+            	QueryExecutor qe = new QueryExecutor(arr[i], jsonMap);
+            	executor.submit(qe);
             }
             
             return "movie: "+arr.toString();//s.toString();

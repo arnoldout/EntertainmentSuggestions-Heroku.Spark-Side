@@ -46,6 +46,7 @@ public class QueryBuilder {
 		}
 		return queries;
 	}
+	//error heres
 	public String generateGenres(int[] genres)
     {
     	StringBuilder sb = new StringBuilder();
