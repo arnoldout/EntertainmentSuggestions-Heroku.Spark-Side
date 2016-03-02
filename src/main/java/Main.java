@@ -39,8 +39,10 @@ public class Main {
             String URI = baseURI + query + endURI;
             JSONObject s = readJsonFromUrl(URI);
             movie.setGenres(movie.getGenres(s));
-            
-            return "movie: " + s.toString();
+            movie.setVoteAvg(movie.getVoteAvg(s));
+            movie.setActor(movie.getActor(s));
+            movie.setDirector(movie.getDirector(s));
+            return "movie: " + movie.toString();//s.toString();
     	});
     }
 
@@ -54,20 +56,17 @@ public class Main {
     	//request genre movies with Lead actor
     	//request genre movies with similar age
     	//request genre movies with similar id
-    	String genres = "with_genres="+genres(m.getGenres());
-    	String years = "&year="+dates(2014);
+    	//String genres = "with_genres="+genres(m.getGenres());
+    	//String years = "&year="+dates(2014);
     	String apiKey = "&api_key=c2dcd458445148b91ed151b2a41a3c22";
     	try {
-			JSONObject q = readJsonFromUrl(baseUri+genres+years+apiKey);
-			return q.toString();
+			//JSONObject q = readJsonFromUrl(baseUri+genres+years+apiKey);
+			//return q.toString();
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	return baseUri+genres+years+apiKey;  	
+		} 
+    	return"";// baseUri+genres+years+apiKey;  	
     	//building query 
     	//year=2008&with_genres=18|28|80|53&with_people=3894
     	//score results

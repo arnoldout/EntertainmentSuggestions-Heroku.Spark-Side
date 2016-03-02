@@ -10,6 +10,11 @@ public class QueryBuilder {
 	 * CHANGE LATER
 	 * 
 	 */
+	String query;
+	public QueryBuilder(Movie m)
+	{
+		genres(m.getGenres());
+	}
 	public static String genres(int[] genres)
     {
     	StringBuilder sb = new StringBuilder();

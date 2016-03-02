@@ -1,11 +1,14 @@
 package main.java;
 
+import java.util.Arrays;
+
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Movie {
 
 	private int genres[];
-	private int voteAvg;
+	private double voteAvg;
 	private int actor; 
 	private int director;
     
@@ -13,7 +16,7 @@ public class Movie {
 		super();
 	}
 
-	public Movie(int[] genres, int voteAvg, int actor, int director) {
+	public Movie(int[] genres, double voteAvg, int actor, int director) {
 		super();
 		this.genres = genres;
 		this.voteAvg = voteAvg;
@@ -28,6 +31,36 @@ public class Movie {
 		}
 		return arr;
 	}
+	public double getVoteAvg(JSONObject s) {
+		return s.getDouble("vote_average");
+	}
+	
+	public int getActor(JSONObject s) {
+		
+		JSONObject castArr = (JSONObject) s.get("credits");
+		JSONObject c = (JSONObject)castArr.getJSONArray("cast").get(0);
+		return (int)c.get("id");
+	}
+	public int getDirector(JSONObject s) {
+		
+		JSONObject castArr = (JSONObject) s.get("credits");
+		JSONArray c = (JSONArray)castArr.getJSONArray("crew");
+		for(int objLoop = 0; objLoop<c.length(); objLoop++)
+		{
+			if(((String)c.getJSONObject(objLoop).get("department")).equals("Directing"))
+			{
+				return (int) c.getJSONObject(objLoop).get("id");
+			}
+		}
+		return -1;
+	}
+	
+	@Override
+	public String toString() {
+		return "Movie [genres=" + Arrays.toString(genres) + ", voteAvg=" + voteAvg + ", actor=" + actor + ", director="
+				+ director + "]";
+	}
+
 	public int[] getGenres() {
 		return genres;
 	}
@@ -36,11 +69,11 @@ public class Movie {
 		this.genres = genres;
 	}
 
-	public int getVoteAvg() {
+	public double getVoteAvg() {
 		return voteAvg;
 	}
 
-	public void setVoteAvg(int voteAvg) {
+	public void setVoteAvg(double voteAvg) {
 		this.voteAvg = voteAvg;
 	}
 
