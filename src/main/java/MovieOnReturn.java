@@ -1,0 +1,81 @@
+package main.java;
+
+import org.json.JSONObject;
+
+public class MovieOnReturn {
+
+	private int genres[];
+	private double voteAvg;
+	public JSONObject json;
+	private int score;
+	private boolean isScored;
+    
+	public MovieOnReturn() {
+		super();
+	}
+	public MovieOnReturn(JSONObject json, String genreStr)
+	{
+		this.genres = this.getGenres(json, genreStr);
+		this.voteAvg = this.getVoteAvg(json);
+		this.json = json;
+	}
+	public MovieOnReturn(int[] genres, double voteAvg) {
+		super();
+		this.genres = genres;
+		this.voteAvg = voteAvg;
+	}
+
+	public JSONObject getJson() {
+		return json;
+	}
+	public void setJson(JSONObject json) {
+		this.json = json;
+	}
+
+	public int getScore() {
+		return score;
+	}
+	public void setScore(int score) {
+		this.score = score;
+	}
+	public void appendScore(int score) {
+		this.score += score;
+	}
+	public boolean isScored() {
+		return isScored;
+	}
+	public void setScored(boolean isScored) {
+		this.isScored = isScored;
+	}
+	public int[] getGenres(JSONObject s, String queryString) {
+		int arr[] = new int[s.getJSONArray(queryString).length()];
+		for(int objLoop = 0; objLoop<s.getJSONArray(queryString).length(); objLoop++)
+		{		
+			arr[objLoop] = (int)s.getJSONArray(queryString).getInt(objLoop);			
+		}
+		return arr;
+	}
+	public int getGenres(int place) {
+		return genres[place];
+	}
+	
+	public double getVoteAvg(JSONObject s) {
+		return s.getDouble("vote_average");
+	}
+	
+	public int[] getGenres() {
+		return genres;
+	}
+
+	public void setGenres(int[] genres) {
+		this.genres = genres;
+	}
+
+	public double getVoteAvg() {
+		return voteAvg;
+	}
+
+	public void setVoteAvg(double voteAvg) {
+		this.voteAvg = voteAvg;
+	}
+}

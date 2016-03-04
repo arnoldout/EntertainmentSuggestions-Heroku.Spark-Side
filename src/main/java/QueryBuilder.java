@@ -2,49 +2,34 @@ package main.java;
 
 public class QueryBuilder {
 
-	private Query queries[];
-	public QueryBuilder(Movie m)
+	private String query;
+	private MovieOnGet movie;
+	public QueryBuilder(MovieOnGet movie)
 	{
-		this.queries = new Query[3];
-		queries = initQueries(m.getGenres(), queries);
-		queries = addStmntQueries(queries, m);
-		queries = appendAPIKey(queries, "&api_key=c2dcd458445148b91ed151b2a41a3c22");
+		this.query = new String();
+		this.movie = movie;
 	}
-	
-	public Query[] getQueries() {
-		return queries;
+	public void createQueries()
+	{
+		this.query = initQueries(movie.getGenres(), query);
+		this.query = addStmntQueries(query, movie);
+		this.query = appendAPIKey(query, "&api_key=c2dcd458445148b91ed151b2a41a3c22");
+	}
+	public String getQueries() {
+		return query;
 	}
 
-	public void setQueries(Query[] queries) {
-		this.queries = queries;
+	public void setQueries(String query) {
+		this.query = query;
 	}
 
-	private Query[] appendAPIKey(Query[] queries, String APIKey) 
+	private String appendAPIKey(String query, String APIKey) 
 	{
-		for(int queryLoop = 0; queryLoop<queries.length; queryLoop++)
-		{
-			queries[queryLoop].appendQuery(queries[queryLoop].getQuery()+APIKey);
-		}
-		return queries;
+		return ((query+APIKey));
 	}
-	public Query[] addStmntQueries(Query[] queries, Movie m)
+	public String addStmntQueries(String query, MovieOnGet m)
 	{
-		for(int queryLoop = 0; queryLoop < queries.length; queryLoop++)
-		{
-			switch(queryLoop)
-			{
-			case 0:
-				queries[queryLoop].appendQuery(queries[queryLoop].getQuery()+"&with_cast="+m.getActor());
-				break;
-			case 1:
-				queries[queryLoop].appendQuery(queries[queryLoop]+"&with_crew="+m.getDirector());
-				break;
-			case 2:
-				queries[queryLoop].appendQuery(queries[queryLoop]+"&vote_average.gte="+m.getVoteAvg());
-				break;
-			}
-		}
-		return queries;
+		return (query+"&with_people="+m.getActors('|')+"|"+m.getDirector());
 	}
 	//error heres
 	public String generateGenres(int[] genres)
@@ -60,18 +45,10 @@ public class QueryBuilder {
     	}
     	return sb.toString();
     }
-	public Query[] initQueries(int[] genres, Query queries[])
+	public String initQueries(int[] genres, String query)
     {
-    	for(int queryLoop = 0; queryLoop<queries.length; queryLoop++)
-    	{
-    		queries[queryLoop].setQuery(initQuery(queries[queryLoop])+"with_genres="+generateGenres(genres)); 
-    	}
-    	return queries;
+		return "http://api.themoviedb.org/3/discover/movie?"+"with_genres="+generateGenres(genres); 
     }
-	public String initQuery(Query query)
-	{
-		return "http://api.themoviedb.org/3/discover/movie?";
-	}
 	/*
     public static String dates(int year)
     {

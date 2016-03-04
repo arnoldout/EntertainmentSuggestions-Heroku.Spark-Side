@@ -5,7 +5,10 @@ import static spark.Spark.*;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.Charset;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import org.json.*;
 
 public class Main {
@@ -30,30 +33,74 @@ public class Main {
         
         get("/request/movie/:movieId", (request, response) ->
         {
-        	Movie movie = new Movie();
         	String baseURI = "http://api.themoviedb.org/3/movie/";
             String endURI = "?api_key=c2dcd458445148b91ed151b2a41a3c22&append_to_response=credits";
-            String query =request.params(":movieId");
+            String query = request.params(":movieId");
             query = URLEncoder.encode(query, "UTF-8");
             String URI = baseURI + query + endURI;
             JSONObject s = readJsonFromUrl(URI);
-            movie.setGenres(movie.getGenres(s));
-            movie.setVoteAvg(movie.getVoteAvg(s));
-            movie.setActor(movie.getActor(s));
-            movie.setDirector(movie.getDirector(s));
+            MovieOnGet movie = new MovieOnGet(s, "genres");
             QueryBuilder qb = new QueryBuilder(movie);
-            ConcurrentHashMap<Integer, JSONObject> jsonMap = new ConcurrentHashMap<>();
-            Query arr[] = qb.getQueries(); 
-            ExecutorService executor = Executors.newFixedThreadPool(arr.length);
-            for(int i=0; i<arr.length; i++)
-            {
-            	//using threads, score results in the threads
-            	QueryExecutor qe = new QueryExecutor(arr[i], jsonMap);
-            	executor.submit(qe);
-            }
-            
-            return "movie: "+arr.toString();//s.toString();
+            qb.createQueries(); 	
+            QueryExecutor qe = new QueryExecutor(qb.getQueries());
+        	return lister(qe.getJson(), movie);
+                        
+            //return "movie: ";//+sb.toString();//s.toString();
     	});
+    }
+    public static JSONArray lister(JSONObject json, MovieOnGet m)
+    {
+    	List<MovieOnReturn> movies = new ArrayList<>();
+    	JSONArray j = (JSONArray) json.get("results");
+    	for(int i = 0; i<j.length(); i++)
+    	{
+    		JSONObject js = j.getJSONObject(i);
+    		movies.add(new MovieOnReturn(js, "genre_ids"));
+    		scoreMovie(m,movies.get(i));
+    	}
+    	Collections.sort(movies, new Comparator<MovieOnReturn>() {
+            @Override
+            public int compare(MovieOnReturn o1, MovieOnReturn o2) {
+                return Integer.compare(o2.getScore(), o1.getScore());
+            }
+        });
+    	//	movies.add(new MovieOnReturn());
+    	JSONArray results = new JSONArray();
+    	for(int i = 0; i<10; i++)
+    	{
+    		results.put(movies.get(i).getJson());
+    	}
+    	return results;
+    }
+    public static void scoreMovie(MovieOnGet mOne, MovieOnReturn mTwo)
+    {
+    	int scrValue = 100/mOne.getGenres().length;
+    	//first movie loop
+    	int oneLength = mOne.getGenres().length;
+		int twoLength = mTwo.getGenres().length;
+		
+    	for(int iOne = 0; iOne<oneLength; iOne++)
+    	{
+    		Boolean found = false;
+    		//second movie loop
+    		for(int iTwo = 0; iTwo<twoLength; iTwo++)
+    		{
+    			if(mOne.getGenres(iOne)==mTwo.getGenres(iTwo))
+    			{
+    				found = true;
+    				break;
+    			}
+    		}
+    		if(found)
+    		{
+    			mTwo.appendScore(scrValue);
+    		}
+    	}
+    	if(oneLength!=twoLength)
+    	{
+    		mTwo.appendScore((Math.abs((oneLength-twoLength))*10)*-1);
+    	}
+    	System.out.println(mTwo.getScore());
     }
      
     public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {

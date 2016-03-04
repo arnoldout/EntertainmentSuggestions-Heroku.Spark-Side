@@ -7,48 +7,37 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class QueryExecutor implements Runnable{
+public class QueryExecutor{
 
-	private Query query;
-	private ConcurrentHashMap<Integer, JSONObject> jsonCollection;
+	private String query;
+	private JSONObject json;
 	
-	
-	public QueryExecutor(Query query, ConcurrentHashMap<Integer, JSONObject> jsonCollection) {
+	public QueryExecutor(String query) {
 		super();
 		this.query = query;
-		this.jsonCollection = jsonCollection;
+		runQuery();
 	}
-	
+	public JSONObject getJson() {
+		return json;
+	}
 
-	public Query getQueries() {
+	public void setJson(JSONObject json) {
+		this.json = json;
+	}
+	public String getQueries() {
 		return query;
 	}
 
-
-	public void setQuery(Query queries) {
+	public void setQuery(String queries) {
 		this.query = queries;
 	}
-
-	public ConcurrentHashMap<Integer, JSONObject> getJsonCollection() {
-		return jsonCollection;
-	}
-
-
-	public void setJsonCollection(ConcurrentHashMap<Integer, JSONObject> jsonCollection) {
-		this.jsonCollection = jsonCollection;
-	}
-
-
-	//overriding the run method from runnable
-	public void run() {
+	public void runQuery()
+	{
 		try {
-			JSONObject s = readJsonFromUrl(this.query.getQuery());
-			System.out.println(s.toString());
+			this.json = readJsonFromUrl(this.query);
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
