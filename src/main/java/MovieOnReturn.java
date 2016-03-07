@@ -3,10 +3,11 @@ package main.java;
 import org.json.JSONObject;
 
 public class MovieOnReturn {
-
+	
+	private int id;
 	private int genres[];
 	private double voteAvg;
-	public JSONObject json;
+	private JSONObject json;
 	private int score;
 	private boolean isScored;
     
@@ -15,6 +16,7 @@ public class MovieOnReturn {
 	}
 	public MovieOnReturn(JSONObject json, String genreStr)
 	{
+		this.id = this.getId(json);
 		this.genres = this.getGenres(json, genreStr);
 		this.voteAvg = this.getVoteAvg(json);
 		this.json = json;
@@ -24,7 +26,9 @@ public class MovieOnReturn {
 		this.genres = genres;
 		this.voteAvg = voteAvg;
 	}
-
+	public int getId(JSONObject s) {
+		return s.getInt("id");
+	}
 	public JSONObject getJson() {
 		return json;
 	}
@@ -77,5 +81,11 @@ public class MovieOnReturn {
 
 	public void setVoteAvg(double voteAvg) {
 		this.voteAvg = voteAvg;
+	}
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
 	}
 }

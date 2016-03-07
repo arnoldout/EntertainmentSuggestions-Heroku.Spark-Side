@@ -10,7 +10,7 @@ import java.nio.charset.Charset;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class QueryExecutor{
+public class QueryExecutor {
 
 	private String query;
 	private JSONObject json;
@@ -18,7 +18,6 @@ public class QueryExecutor{
 	public QueryExecutor(String query) {
 		super();
 		this.query = query;
-		runQuery();
 	}
 	public JSONObject getJson() {
 		return json;
@@ -65,6 +64,4 @@ public class QueryExecutor{
         }
         return sb.toString();
       }
-	
-	
 }

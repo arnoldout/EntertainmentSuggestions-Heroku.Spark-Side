@@ -4,10 +4,12 @@ public class QueryBuilder {
 
 	private String query;
 	private MovieOnGet movie;
-	public QueryBuilder(MovieOnGet movie)
+	private int pageNo;
+	public QueryBuilder(MovieOnGet movie, int pageNo)
 	{
 		this.query = new String();
 		this.movie = movie;
+		this.setPageNo(pageNo);
 	}
 	public void createQueries()
 	{
@@ -29,7 +31,7 @@ public class QueryBuilder {
 	}
 	public String addStmntQueries(String query, MovieOnGet m)
 	{
-		return (query+"&with_people="+m.getActors('|')+"|"+m.getDirector());
+		return (query+"&with_people="+m.getActors('|')+"|"+m.getDirector()+"&page="+getPageNo());
 	}
 	//error heres
 	public String generateGenres(int[] genres)
@@ -49,25 +51,10 @@ public class QueryBuilder {
     {
 		return "http://api.themoviedb.org/3/discover/movie?"+"with_genres="+generateGenres(genres); 
     }
-	/*
-    public static String dates(int year)
-    {
-    	StringBuilder sb = new StringBuilder();
-    	int strtYear = year-5;;
-    	int yrDiff = Calendar.getInstance().get(Calendar.YEAR)-year;
-    	if(yrDiff<5)
-		{
-    		strtYear = strtYear - yrDiff;
-		}
-    	for(int yrLoop = 0; yrLoop<10; yrLoop++)
-    	{
-    		if(yrLoop!=0)
-    		{
-    			sb.append("|");
-    		}
-    		int currYear = strtYear+yrLoop;
-    		sb.append(currYear);
-    	}
-    	return sb.toString();
-    }*/
+	public int getPageNo() {
+		return pageNo;
+	}
+	public void setPageNo(int pageNo) {
+		this.pageNo = pageNo;
+	}
 }

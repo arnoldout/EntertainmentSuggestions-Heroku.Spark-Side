@@ -12,6 +12,7 @@ import java.util.List;
 import org.json.*;
 
 public class Main {
+	static List<MovieOnReturn> movies = Collections.synchronizedList(new ArrayList<MovieOnReturn>());
     public static void main(String[] args) {
     	//port(Integer.valueOf(System.getenv("PORT")));
     	//Movie m = new Movie(new int[]{18,28,80,53},7, 211, 132);
@@ -33,30 +34,62 @@ public class Main {
         
         get("/request/movie/:movieId", (request, response) ->
         {
+        	final long startTime = System.currentTimeMillis();
         	String baseURI = "http://api.themoviedb.org/3/movie/";
-            String endURI = "?api_key=c2dcd458445148b91ed151b2a41a3c22&append_to_response=credits";
+            String endURI = "?api_key=c2dcd458445148b91ed151b2a41a3c22&append_to_response=credits,keywords";
             String query = request.params(":movieId");
             query = URLEncoder.encode(query, "UTF-8");
             String URI = baseURI + query + endURI;
+            
             JSONObject s = readJsonFromUrl(URI);
+            final long endTime = System.currentTimeMillis();
+            System.out.println("Total execution time: " + (endTime - startTime) );
             MovieOnGet movie = new MovieOnGet(s, "genres");
-            QueryBuilder qb = new QueryBuilder(movie);
+            QueryBuilder qb = new QueryBuilder(movie, 1);
             qb.createQueries(); 	
-            QueryExecutor qe = new QueryExecutor(qb.getQueries());
-        	return lister(qe.getJson(), movie);
-                        
-            //return "movie: ";//+sb.toString();//s.toString();
+        	QueryExecutor qe = new QueryExecutor(qb.getQueries());
+            qe.runQuery();
+            
+            movies = lister(qe.getJson(), movie, movies);
+            int i = (int)qe.getJson().get("total_pages");
+            if(i>1)
+            {
+	            for(int j = 2; j<i; j++)
+	            {
+	            	QueryBuilder qbj = new QueryBuilder(movie, j);
+	            	Thread t = new Thread() {
+	            	    public void run() {
+	                        qb.createQueries(); 	
+	                    	QueryExecutor qej = new QueryExecutor(qb.getQueries());
+	                        qe.runQuery();
+	                        //mutex lock here
+	                        movies = lister(qe.getJson(), movie, movies);
+	            	    }
+	            	};	
+	            	t.start();   	
+	            }
+            }
+            JSONArray sj = parseJSONList(movies); 
+        	return sj;
     	});
     }
-    public static JSONArray lister(JSONObject json, MovieOnGet m)
+    
+    public static List<MovieOnReturn> lister(JSONObject json, MovieOnGet m, List<MovieOnReturn> movies)
     {
-    	List<MovieOnReturn> movies = new ArrayList<>();
     	JSONArray j = (JSONArray) json.get("results");
     	for(int i = 0; i<j.length(); i++)
-    	{
+    	{    	
     		JSONObject js = j.getJSONObject(i);
-    		movies.add(new MovieOnReturn(js, "genre_ids"));
-    		scoreMovie(m,movies.get(i));
+    		MovieOnReturn newMov = new MovieOnReturn(js, "genre_ids");
+    		if(newMov.getId()!=m.getId())
+    		{
+    			movies.add(newMov);
+    			scoreMovie(m,movies.get(i));
+    		}
+    		else{
+    			movies.add(i, new MovieOnReturn());
+    		}
+    		
     	}
     	Collections.sort(movies, new Comparator<MovieOnReturn>() {
             @Override
@@ -64,13 +97,39 @@ public class Main {
                 return Integer.compare(o2.getScore(), o1.getScore());
             }
         });
+    	return movies;
+	}
+    public static JSONArray parseJSONList (List<MovieOnReturn> movies)
+    {
     	//	movies.add(new MovieOnReturn());
     	JSONArray results = new JSONArray();
-    	for(int i = 0; i<10; i++)
+    	//results.put("results");
+    	int maxListSize = 10;
+    	if(movies.size()<10)
     	{
-    		results.put(movies.get(i).getJson());
+    		maxListSize = movies.size();
     	}
+    	int counter = 0;
+    	Boolean goodMatch = true;
+    	while(counter<maxListSize&&goodMatch==true)
+    	{
+    		if(movies.get(counter).getScore()>=100)
+    		{
+	    		results.put(movies.get(counter).getJson());
+	    		counter++;
+    		}
+    		else
+    		{
+    			goodMatch=false;
+    		}
+    		if(counter==(maxListSize)&&movies.get(counter).getScore()>=100)
+			{
+    			maxListSize++;
+			}
+    	}
+    	System.out.println("RETURNED");
     	return results;
+    
     }
     public static void scoreMovie(MovieOnGet mOne, MovieOnReturn mTwo)
     {
@@ -98,7 +157,7 @@ public class Main {
     	}
     	if(oneLength!=twoLength)
     	{
-    		mTwo.appendScore((Math.abs((oneLength-twoLength))*10)*-1);
+    		mTwo.appendScore((Math.abs((oneLength-twoLength))*(scrValue/4))*-1);
     	}
     	System.out.println(mTwo.getScore());
     }

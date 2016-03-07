@@ -1,44 +1,40 @@
 package main.java;
 
-import java.util.Arrays;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class MovieOnGet {
-
+	
+	private int id;
 	private int genres[];
 	private double voteAvg;
 	private int actors[]; 
 	private int director;
-    
-	public MovieOnGet() {
-		super();
-	}
+    private int writer;
+	
 	public MovieOnGet(JSONObject json, String genreStr)
 	{
+		this.id = this.getId(json);
 		this.genres = this.getGenres(json, genreStr);
 		this.voteAvg = this.getVoteAvg(json);
 		this.actors = this.getActor(json);
 		this.director = this.getDirector(json);
+		this.writer = this.getWriter(json);
 	}
-	public MovieOnGet(int[] genres, double voteAvg, int actor[], int director) {
-		super();
-		this.genres = genres;
-		this.voteAvg = voteAvg;
-		this.actors = actor;
-		this.director = director;
+	public int getWriter() {
+		return writer;
+	}
+	public void setWriter(int writer) {
+		this.writer = writer;
+	}
+	public int getId(JSONObject s) {
+		return s.getInt("id");
 	}
 	public int[] getGenres(JSONObject s, String queryString) {
 		int arr[] = new int[s.getJSONArray(queryString).length()];
 		for(int objLoop = 0; objLoop<s.getJSONArray(queryString).length(); objLoop++)
 		{
-			arr[objLoop] = (int)s.getJSONArray(queryString).getJSONObject(objLoop).get("id");
-			/*JSONArray jsk = s.getJSONArray(queryString);
-			JSONObject nnmn = jsk.getJSONObject(objLoop);//.get("id");
-			int i = (int)jsk.get("id");
-			i = i+1;*/
-			
+			arr[objLoop] = (int)s.getJSONArray(queryString).getJSONObject(objLoop).get("id");		
 		}
 		return arr;
 	}
@@ -48,7 +44,7 @@ public class MovieOnGet {
 	
 	public int[] getActor(JSONObject s)
 	{
-		int[] actors = new int[2];
+		int[] actors = new int[3];
 		JSONObject castArr = (JSONObject) s.get("credits");
 		for(int actorLoop = 0; actorLoop<actors.length; actorLoop++)
 		{
@@ -69,6 +65,19 @@ public class MovieOnGet {
 			}
 		}
 		return -1;
+	}
+	public int getWriter(JSONObject s) {
+			
+			JSONObject castArr = (JSONObject) s.get("credits");
+			JSONArray c = (JSONArray)castArr.getJSONArray("crew");
+			for(int objLoop = 0; objLoop<c.length(); objLoop++)
+			{
+				if(((String)c.getJSONObject(objLoop).get("department")).equals("Writing"))
+				{
+					return (int) c.getJSONObject(objLoop).get("id");
+				}
+			}
+			return -1;
 	}
 	public int[] getGenres() {
 		return genres;
@@ -110,5 +119,11 @@ public class MovieOnGet {
 			sb.append(""+c+actors[actorLoop]);
 		}
 		return sb.toString();
+	}
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
 	}
 }
