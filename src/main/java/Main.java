@@ -54,7 +54,7 @@ public class Main {
             int i = (int)qe.getJson().get("total_pages");
             if(i>1)
             {
-	            for(int j = 2; j<i; j++)
+	            for(int j = 2; j<=i; j++)
 	            {
 	            	QueryBuilder qbj = new QueryBuilder(movie, j);
 	            	Thread t = new Thread() {
@@ -113,7 +113,7 @@ public class Main {
     	Boolean goodMatch = true;
     	while(counter<maxListSize&&goodMatch==true)
     	{
-    		if(movies.get(counter).getScore()>=100)
+    		if(movies.get(counter).getScore()>=80)
     		{
 	    		results.put(movies.get(counter).getJson());
 	    		counter++;
@@ -122,7 +122,8 @@ public class Main {
     		{
     			goodMatch=false;
     		}
-    		if(counter==(maxListSize)&&movies.get(counter).getScore()>=100)
+    		//if after respectable amount of movies, scores are still very strong, then carry on
+    		if(counter==(maxListSize)&&movies.get(counter).getScore()>=90)
 			{
     			maxListSize++;
 			}
