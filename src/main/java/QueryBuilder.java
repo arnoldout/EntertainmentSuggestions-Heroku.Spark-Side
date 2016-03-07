@@ -49,7 +49,7 @@ public class QueryBuilder {
     }
 	public String initQueries(int[] genres, String query)
     {
-		return "http://api.themoviedb.org/3/discover/movie?"+"with_genres="+generateGenres(genres); 
+		return "http://api.themoviedb.org/3/discover/movie?"+"with_keywords="+generateGenres(genres); 
     }
 	public int getPageNo() {
 		return pageNo;

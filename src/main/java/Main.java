@@ -44,7 +44,7 @@ public class Main {
             JSONObject s = readJsonFromUrl(URI);
             final long endTime = System.currentTimeMillis();
             System.out.println("Total execution time: " + (endTime - startTime) );
-            MovieOnGet movie = new MovieOnGet(s, "genres");
+            MovieOnGet movie = new MovieOnGet(s, "keywords");
             QueryBuilder qb = new QueryBuilder(movie, 1);
             qb.createQueries(); 	
         	QueryExecutor qe = new QueryExecutor(qb.getQueries());

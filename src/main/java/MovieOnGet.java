@@ -31,10 +31,11 @@ public class MovieOnGet {
 		return s.getInt("id");
 	}
 	public int[] getGenres(JSONObject s, String queryString) {
-		int arr[] = new int[s.getJSONArray(queryString).length()];
-		for(int objLoop = 0; objLoop<s.getJSONArray(queryString).length(); objLoop++)
+		JSONObject k = (JSONObject) s.get(queryString);
+		int arr[] = new int[k.getJSONArray(queryString).length()];
+		for(int objLoop = 0; objLoop<k.getJSONArray(queryString).length(); objLoop++)
 		{
-			arr[objLoop] = (int)s.getJSONArray(queryString).getJSONObject(objLoop).get("id");		
+			arr[objLoop] = (int)k.getJSONArray(queryString).getJSONObject(objLoop).get("id");		
 		}
 		return arr;
 	}
