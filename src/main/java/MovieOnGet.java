@@ -7,6 +7,7 @@ public class MovieOnGet {
 	
 	private int id;
 	private int genres[];
+	private int keywords[];
 	private double voteAvg;
 	private int actors[]; 
 	private int director;
@@ -20,6 +21,7 @@ public class MovieOnGet {
 		this.actors = this.getActor(json);
 		this.director = this.getDirector(json);
 		this.writer = this.getWriter(json);
+		this.keywords = this.getKeywords(json, "keywords");
 	}
 	public int getWriter() {
 		return writer;
@@ -31,6 +33,14 @@ public class MovieOnGet {
 		return s.getInt("id");
 	}
 	public int[] getGenres(JSONObject s, String queryString) {
+		int arr[] = new int[s.getJSONArray(queryString).length()];
+		for(int objLoop = 0; objLoop<s.getJSONArray(queryString).length(); objLoop++)
+		{
+			arr[objLoop] = (int)s.getJSONArray(queryString).getJSONObject(objLoop).get("id");		
+		}
+		return arr;
+	}
+	public int[] getKeywords(JSONObject s, String queryString) {
 		JSONObject k = (JSONObject) s.get(queryString);
 		int arr[] = new int[k.getJSONArray(queryString).length()];
 		for(int objLoop = 0; objLoop<k.getJSONArray(queryString).length(); objLoop++)
@@ -126,5 +136,11 @@ public class MovieOnGet {
 	}
 	public void setId(int id) {
 		this.id = id;
+	}
+	public int[] getKeywords() {
+		return keywords;
+	}
+	public void setKeywords(int keywords[]) {
+		this.keywords = keywords;
 	}
 }
