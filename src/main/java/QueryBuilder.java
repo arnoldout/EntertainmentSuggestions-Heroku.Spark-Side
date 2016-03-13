@@ -14,7 +14,7 @@ public class QueryBuilder {
 	public void createQueries()
 	{
 		this.query = initQueries(movie.getKeywords(), query);
-		//this.query = addStmntQueries(query, movie);
+		this.query = addStmntQueries(query, movie);
 		this.query = appendAPIKey(query, "&api_key=c2dcd458445148b91ed151b2a41a3c22");
 	}
 	public String getQueries() {
@@ -31,7 +31,7 @@ public class QueryBuilder {
 	}
 	public String addStmntQueries(String query, MovieOnGet m)
 	{
-		return (query+"&with_people="+m.getActors('|')+"|"+m.getDirector()+"&page="+getPageNo());
+		return (query+"&vote_count.gte="+750+"&page="+getPageNo());
 	}
 	//error heres
 	public String generateKeywords(int[] keywords)
