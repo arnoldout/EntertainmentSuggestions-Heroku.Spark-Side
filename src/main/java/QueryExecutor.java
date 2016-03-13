@@ -7,17 +7,23 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.List;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class QueryExecutor {
+public class QueryExecutor implements Runnable{
 
 	private String query;
 	private JSONObject json;
+	private List<MovieOnReturn> movies;
+	private MovieOnGet reqMov;
 	
-	public QueryExecutor(String query) {
+	public QueryExecutor(String query, List<MovieOnReturn> movies, MovieOnGet reqMovie) {
 		super();
 		this.query = query;
+		this.setMovies(movies);
+		this.reqMov = reqMovie;
 	}
 	public JSONObject getJson() {
 		return json;
@@ -33,8 +39,9 @@ public class QueryExecutor {
 	public void setQuery(String queries) {
 		this.query = queries;
 	}
-	public void runQuery()
-	{
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
 		try {
 			this.json = readJsonFromUrl(this.query);
 		} catch (JSONException e) {
@@ -43,7 +50,8 @@ public class QueryExecutor {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}		
+		Main.lister(getJson(),reqMov);
 	}
 	public JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
         InputStream is = new URL(url).openStream();
@@ -64,4 +72,11 @@ public class QueryExecutor {
         }
         return sb.toString();
       }
+	public List<MovieOnReturn> getMovies() {
+		return movies;
+	}
+	public void setMovies(List<MovieOnReturn> movies) {
+		this.movies = movies;
+	}
+	
 }

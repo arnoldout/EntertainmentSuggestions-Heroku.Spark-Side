@@ -18,7 +18,7 @@ public class MovieOnReturn {
 	{
 		this.id = this.getId(json);
 		this.genres = this.getGenres(json, genreStr);
-		this.voteAvg = this.getVoteAvg(json);
+		//this.voteAvg = this.getVoteAvg(json);
 		this.json = json;
 	}
 	public MovieOnReturn(int[] genres, double voteAvg) {
@@ -52,8 +52,9 @@ public class MovieOnReturn {
 		this.isScored = isScored;
 	}
 	public int[] getGenres(JSONObject s, String queryString) {
-		int arr[] = new int[s.getJSONArray(queryString).length()];
-		for(int objLoop = 0; objLoop<s.getJSONArray(queryString).length(); objLoop++)
+		int[] k = new int[s.getJSONArray(queryString).length()];
+		int arr[] = new int[k.length];
+		for(int objLoop = 0; objLoop<k.length; objLoop++)
 		{		
 			arr[objLoop] = (int)s.getJSONArray(queryString).getInt(objLoop);			
 		}
