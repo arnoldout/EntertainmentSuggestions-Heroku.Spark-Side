@@ -64,7 +64,7 @@ public class Main {
         //if score below 0 then dump that shits
         
         get("/request/movie/:movieId", (request, response) ->
-        {
+        {    	
         	movies = Collections.synchronizedList(new ArrayList<MovieOnReturn>());
         	final long startTime = System.currentTimeMillis();
         	String baseURI = "http://api.themoviedb.org/3/movie/";
@@ -77,11 +77,11 @@ public class Main {
             final long endTime = System.currentTimeMillis();
             System.out.println("Total execution time: " + (endTime - startTime) );
             MovieOnGet movie = new MovieOnGet(s, "genres");
-            return getMovies(movie);
+            return getMovies(movie);	
     	});
     }
 
-	private static Object getMovies(MovieOnGet movie) throws InterruptedException {
+	private static JSONArray getMovies(MovieOnGet movie) throws InterruptedException {
 		QueryBuilder qb = new QueryBuilder(movie, 1);
 		qb.createQueries(); 	
 		QueryExecutor qe = new QueryExecutor(qb.getQueries(), movies, movie);
@@ -121,6 +121,7 @@ public class Main {
     	{    	
     		JSONObject js = j.getJSONObject(i);
     		MovieOnReturn newMov = new MovieOnReturn(js, "genre_ids");
+    		
     		if(newMov.getId()!=m.getId())
     		{
     			scoreMovie(m, newMov);
@@ -152,7 +153,12 @@ public class Main {
     	//first movie loop
     	int oneLength = mOne.getGenres().length;
 		int twoLength = mTwo.getGenres().length;
-		
+		//a correct genre now worth double points
+		/*
+		*
+		*
+		*/
+		///scrValue = scrValue*2;
     	for(int iOne = 0; iOne<oneLength; iOne++)
     	{
     		Boolean found = false;
@@ -172,22 +178,29 @@ public class Main {
     	}
     	if(oneLength!=twoLength)
     	{
-    		mTwo.appendScore((Math.abs((oneLength-twoLength))*(scrValue/4))*-1);
+    		mTwo.appendScore((Math.abs((oneLength-twoLength))*(scrValue/2))*-1);
     	}
     	System.out.println(mTwo.getScore());
     }
     public static JSONArray parseJSONList (List<MovieOnReturn> movies)
     {
-    	//	movies.add(new MovieOnReturn());
+    	//results gathers the json objects together in an array
     	JSONArray results = new JSONArray();
-    	//results.put("results");
+    	//maxListSize is a threshold for the results, it will stay at 10 unless the returned results 
+    	//at 10 are still really good matches
     	int maxListSize = 10;
+    	//threshold will be shrunk to a minimum if the list dosnt contain enough movies 
+    	//to satisfy the conditions
     	if(movies.size()<10)
     	{
-    		maxListSize = movies.size();
+    		maxListSize = movies.size()-1;
     	}
+    	//simple variables to control the flow of the while loop
     	int counter = 0;
     	Boolean goodMatch = true;
+    	//max values controls access to the returning json array
+    	//the barrier for entry is initially set very high, but will shrink 
+    	//if there are not enough values in the JSONArray
     	int maxValues = 100;
     	while(counter<maxListSize&&goodMatch==true)
     	{
@@ -205,12 +218,19 @@ public class Main {
     			goodMatch=false;
     		}
     		//if after respectable amount of movies, scores are still very strong, then carry on
-    		if(counter==(maxListSize)&&movies.get(counter).getScore()>=90)
-			{
-    			maxListSize++;
-			}
+    		
+    		try{
+	    		if(counter==(maxListSize)&&movies.get(counter).getScore()>=90)
+				{
+	    			maxListSize++;
+				}
+    		}
+    		catch(Exception ex)
+    		{
+    			System.out.println("");
+    		}
+    		
     	}
-    	System.out.println("RETURNED");
     	return results;
     
     }    

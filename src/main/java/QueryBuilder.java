@@ -31,7 +31,7 @@ public class QueryBuilder {
 	}
 	public String addStmntQueries(String query, MovieOnGet m)
 	{
-		return (query+"&vote_count.gte="+750+"&page="+getPageNo());
+		return (query+"&vote_count.gte="+50+"&page="+getPageNo());
 	}
 	//error heres
 	public String generateKeywords(int[] keywords)
