@@ -155,7 +155,7 @@ public class Main {
     			{
     				if(mapMov.containsKey(newMov.getId()))
     				{
-    					newMov.appendScore(mapMov.get(newMov.getId()).getScore()*2);
+    					newMov.appendScore(mapMov.get(newMov.getId()).getScore());
     				}
     				else
     				{
