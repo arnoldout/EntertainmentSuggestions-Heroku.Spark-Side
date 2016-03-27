@@ -18,12 +18,14 @@ public class QueryExecutor implements Runnable{
 	private JSONObject json;
 	private List<MovieOnReturn> movies;
 	private MovieOnGet reqMov;
+	private Boolean isStaff;
 	
-	public QueryExecutor(String query, List<MovieOnReturn> movies, MovieOnGet reqMovie) {
+	public QueryExecutor(String query, List<MovieOnReturn> movies, MovieOnGet reqMovie, Boolean isStaff) {
 		super();
 		this.query = query;
 		this.setMovies(movies);
 		this.reqMov = reqMovie;
+		this.isStaff = isStaff;
 	}
 	public JSONObject getJson() {
 		return json;
@@ -51,7 +53,7 @@ public class QueryExecutor implements Runnable{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
-		Main.lister(getJson(),reqMov);
+		Main.lister(getJson(),reqMov, isStaff);
 	}
 	public JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
         InputStream is = new URL(url).openStream();

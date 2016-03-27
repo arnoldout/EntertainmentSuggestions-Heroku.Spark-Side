@@ -9,17 +9,24 @@ public class MovieOnReturn {
 	private double voteAvg;
 	private JSONObject json;
 	private int score;
-	private boolean isScored;
+	private boolean isStaff;
     
 	public MovieOnReturn() {
 		super();
 	}
-	public MovieOnReturn(JSONObject json, String genreStr)
+	public MovieOnReturn(JSONObject json, String genreStr, Boolean isStaff)
 	{
 		this.id = this.getId(json);
 		this.genres = this.getGenres(json, genreStr);
 		//this.voteAvg = this.getVoteAvg(json);
 		this.json = json;
+		this.isStaff = isStaff;
+	}
+	public boolean isStaff() {
+		return isStaff;
+	}
+	public void setStaff(boolean isStaff) {
+		this.isStaff = isStaff;
 	}
 	public MovieOnReturn(int[] genres, double voteAvg) {
 		super();
@@ -45,12 +52,7 @@ public class MovieOnReturn {
 	public void appendScore(int score) {
 		this.score += score;
 	}
-	public boolean isScored() {
-		return isScored;
-	}
-	public void setScored(boolean isScored) {
-		this.isScored = isScored;
-	}
+	
 	public int[] getGenres(JSONObject s, String queryString) {
 		int[] k = new int[s.getJSONArray(queryString).length()];
 		int arr[] = new int[k.length];

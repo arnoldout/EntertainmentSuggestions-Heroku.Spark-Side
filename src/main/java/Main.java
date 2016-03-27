@@ -8,7 +8,9 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -82,22 +84,41 @@ public class Main {
     }
 
 	private static JSONArray getMovies(MovieOnGet movie) throws InterruptedException {
-		QueryBuilder qb = new QueryBuilder(movie, 1);
+		QueryBuilder qb = new KeywordsQuery(movie, 1);
 		qb.createQueries(); 	
-		QueryExecutor qe = new QueryExecutor(qb.getQueries(), movies, movie);
+		QueryExecutor qe = new QueryExecutor(qb.getQueries(), movies, movie, false);
 		qe.run();
 		
-		int totPages = (int)qe.getJson().get("total_pages");
-		if(totPages>1)
+		QueryBuilder staff = new StaffQuery(movie, 1);
+		staff.createQueries();
+		QueryExecutor qe2 = new QueryExecutor(staff.getQueries(), movies, movie, true);
+		qe2.run();
+		
+		int totKeyPages = (int)qe.getJson().get("total_pages");
+		int totStaffPages = (int)qe2.getJson().get("total_pages");
+
+		if(totKeyPages>1||totStaffPages>1)
 		{
-			ExecutorService executor = Executors.newFixedThreadPool(totPages);
-			for(int j = 2; j<=totPages; j++)
+			ExecutorService executor = Executors.newFixedThreadPool(totKeyPages+totStaffPages);
+			int sum = (totKeyPages+(totStaffPages-1));
+			for(int j = 2; j<=sum; j++)
 		    {
-		    	QueryBuilder qbj = new QueryBuilder(movie, j);
-		    	qbj.createQueries(); 	
-		        QueryExecutor qej = new QueryExecutor(qbj.getQueries(), movies, movie);
-		             
-		        executor.submit(qej);
+				if(j<=totKeyPages)
+				{
+			    	QueryBuilder qbj = new KeywordsQuery(movie, j);
+			    	qbj.createQueries(); 	
+			        QueryExecutor qej = new QueryExecutor(qbj.getQueries(), movies, movie, false);
+			        
+			        executor.submit(qej);
+				}
+				else
+				{
+					int pageNo = j-totKeyPages;
+					QueryBuilder qbj = new StaffQuery(movie, pageNo);
+			    	qbj.createQueries(); 	
+			        QueryExecutor qej = new QueryExecutor(qbj.getQueries(), movies, movie, true);
+			        executor.submit(qej);
+				}
 		    }
 			executor.shutdown();
 			executor.awaitTermination(50000, TimeUnit.MINUTES);
@@ -106,13 +127,13 @@ public class Main {
 		{
 			listSort();
 		}
-		
-		JSONArray sj = parseJSONList(movies); 
+		HashMap<Integer, JSONObject> jsonMap = new HashMap<>();
+		JSONArray sj = parseJSONList(movies, jsonMap); 
 
 		return sj;
 	}
 
-    public static void lister(JSONObject json, MovieOnGet m)
+    public static void lister(JSONObject json, MovieOnGet m, Boolean isStaff)
     {
     	//add some dynamism
     	List<MovieOnReturn> tempMovies = new ArrayList<MovieOnReturn>();
@@ -120,8 +141,9 @@ public class Main {
     	for(int i = 0; i<j.length(); i++)
     	{    	
     		JSONObject js = j.getJSONObject(i);
-    		MovieOnReturn newMov = new MovieOnReturn(js, "genre_ids");
-    		
+    		MovieOnReturn newMov = new MovieOnReturn(js, "genre_ids", isStaff);
+    		int id = newMov.getId();
+    		id = id+2;
     		if(newMov.getId()!=m.getId())
     		{
     			scoreMovie(m, newMov);
@@ -149,17 +171,19 @@ public class Main {
 
     public static void scoreMovie(MovieOnGet mOne, MovieOnReturn mTwo)
     {
+    	/*
+    	 * 
+    	 * INSTEAD OF SENDING OFF ONE THREADED QUERY FOR DIRECTOR AND WRITER
+    	 * SEND OFF 2 REQUESTS, 1 FOR DIRECTOR, 1 FOR WRITER
+    	 * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+    	 * MARK EACH AS SUCH, WHEN ADDING TO LIST, CHECK IF ALREADY THERE, IF IT IS, ADD POINTS TO IT RATHER THAN DOUBLE ENTRIES
+    	 * TRY DOING THIS EXACT THING B4 DOING ABOVE, MIGHT WORK FINE JUST BY DOING THAT? FIIK
+    	 * 
+    	 */
     	int scrValue = 100/mOne.getGenres().length;
-    	//first movie loop
     	int oneLength = mOne.getGenres().length;
 		int twoLength = mTwo.getGenres().length;
-		//a correct genre now worth double points
-		/*
-		*
-		*
-		*/
-		///scrValue = scrValue*2;
-    	for(int iOne = 0; iOne<oneLength; iOne++)
+		for(int iOne = 0; iOne<oneLength; iOne++)
     	{
     		Boolean found = false;
     		//second movie loop
@@ -173,19 +197,26 @@ public class Main {
     		}
     		if(found)
     		{
-    			mTwo.appendScore(scrValue);
+    			if(mTwo.isStaff())
+    			{
+    				mTwo.appendScore((int) (scrValue+(scrValue+10)));
+    			}
+    			else
+    			{
+    				mTwo.appendScore(scrValue);
+    			}
     		}
     	}
     	if(oneLength!=twoLength)
     	{
     		mTwo.appendScore((Math.abs((oneLength-twoLength))*(scrValue/2))*-1);
     	}
-    	System.out.println(mTwo.getScore());
+    	//System.out.println(mTwo.getScore());
     }
-    public static JSONArray parseJSONList (List<MovieOnReturn> movies)
+    public static JSONArray parseJSONList (List<MovieOnReturn> movies, HashMap<Integer, JSONObject> jsonMap)
     {
     	//results gathers the json objects together in an array
-    	JSONArray results = new JSONArray();
+    	HashMap<Integer, JSONObject> garbageMovies = new HashMap<>();
     	//maxListSize is a threshold for the results, it will stay at 10 unless the returned results 
     	//at 10 are still really good matches
     	int maxListSize = 10;
@@ -199,17 +230,26 @@ public class Main {
     	int counter = 0;
     	Boolean goodMatch = true;
     	//max values controls access to the returning json array
-    	//the barrier for entry is initially set very high, but will shrink 
+    	//the barrier for entry is initially set very high(the highest Score in the list), but will shrink 
     	//if there are not enough values in the JSONArray
-    	int maxValues = 100;
+    	int maxValues = movies.get(counter).getScore();
+    	int io = -1;
     	while(counter<maxListSize&&goodMatch==true)
     	{
+    		io++;
+    		int isp = movies.get(counter).getScore();
+    		int asd = movies.get(counter).getId();
+    		System.out.println("Id: "+asd+" Score: "+isp);
     		if(movies.get(counter).getScore()>=maxValues)
     		{
-	    		results.put(movies.get(counter).getJson());
-	    		counter++;
+    			//if value is not in map already
+    			if(jsonMap.get(movies.get(counter).getId()) == null)
+    			{
+		    		jsonMap.put(movies.get(counter).getId(), movies.get(counter).getJson());
+    			}
+    			counter++;
     		}
-    		else if(results.length()<maxListSize)
+    		else if(jsonMap.size()<maxListSize)
     		{
     			maxValues-=10;
     		}
@@ -230,6 +270,10 @@ public class Main {
     			System.out.println("");
     		}
     		
+    	}
+    	JSONArray results = new JSONArray();
+    	for(Entry<Integer, JSONObject> value: jsonMap.entrySet()) {
+    		results.put(value.getValue());
     	}
     	return results;
     
