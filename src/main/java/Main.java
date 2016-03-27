@@ -19,9 +19,10 @@ import org.json.*;
 
 public class Main {
 	public static List<MovieOnReturn> movies;
+	public static HashMap<Integer, MovieOnReturn> mapMov;
     public static void main(String[] args) {
-    	//port(Integer.valueOf(System.getenv("PORT")));
-    	//Movie m = new Movie(new int[]{18,28,80,53},7, 211, 132);
+    	port(Integer.valueOf(System.getenv("PORT")));
+    	
     	get("/", (request, response) -> 
     	{
     		return "Message: ";
@@ -68,6 +69,8 @@ public class Main {
         get("/request/movie/:movieId", (request, response) ->
         {    	
         	movies = Collections.synchronizedList(new ArrayList<MovieOnReturn>());
+        	mapMov = new HashMap();
+        	
         	final long startTime = System.currentTimeMillis();
         	String baseURI = "http://api.themoviedb.org/3/movie/";
             String endURI = "?api_key=c2dcd458445148b91ed151b2a41a3c22&append_to_response=credits,keywords";
@@ -150,7 +153,17 @@ public class Main {
     			//PROBABLY A TERRIBLE IDEA, REMOVE IF STATEMENT IF NO RESULTS START GETTING RETURNED
     			if(newMov.getScore()>0)
     			{
+    				if(mapMov.containsKey(newMov.getId()))
+    				{
+    					newMov.appendScore(mapMov.get(newMov.getId()).getScore()*2);
+    				}
+    				else
+    				{
+    					mapMov.put(newMov.getId(), newMov);
+    				}
+    				//add to map, check the maps
     				tempMovies.add(newMov);
+    				
     			}
     		}
     		else{
