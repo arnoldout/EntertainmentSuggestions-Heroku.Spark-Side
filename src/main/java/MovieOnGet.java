@@ -55,7 +55,7 @@ public class MovieOnGet {
 	
 	public int[] getActor(JSONObject s)
 	{
-		int[] actors = new int[3];
+		int[] actors = new int[1];
 		JSONObject castArr = (JSONObject) s.get("credits");
 		for(int actorLoop = 0; actorLoop<actors.length; actorLoop++)
 		{
