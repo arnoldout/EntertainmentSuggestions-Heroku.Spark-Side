@@ -64,7 +64,7 @@ public class StaffQuery extends QueryBuilder{
 		// TODO Auto-generated method stub
 		return super.getQuery();
 	}
-	//add some extra parameteres, i.e. ensure that movies can only be added when they have more than 50 votes
+	//add some extra parameters, i.e. ensure that movies can only be added when they have more than 50 votes
 	public String addStmntQueries(String query, MovieOnGet m)
 	{
 		return (query+"&vote_count.gte="+50+"&page="+getPageNo());
