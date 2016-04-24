@@ -2,6 +2,10 @@ package main.java;
 
 import org.json.JSONObject;
 
+/*
+ * MovieOnReturn stores any potential movies that could be returned the client.
+ * 	It also stores the whole json object of that particular movie, which is used as an easy way to gather all the json objects for returning movies.
+ */
 public class MovieOnReturn {
 	
 	private int id;
@@ -11,28 +15,32 @@ public class MovieOnReturn {
 	private int score;
 	private boolean isStaff;
     
+	//constructors
 	public MovieOnReturn() {
 		super();
 	}
+	
 	public MovieOnReturn(JSONObject json, String genreStr, Boolean isStaff)
 	{
 		this.id = this.getId(json);
 		this.genres = this.getGenres(json, genreStr);
-		//this.voteAvg = this.getVoteAvg(json);
 		this.json = json;
 		this.isStaff = isStaff;
 	}
+	
+	public MovieOnReturn(int[] genres, double voteAvg) {
+		super();
+		this.genres = genres;
+		this.voteAvg = voteAvg;
+	}
+	//getters and setters
 	public boolean isStaff() {
 		return isStaff;
 	}
 	public void setStaff(boolean isStaff) {
 		this.isStaff = isStaff;
 	}
-	public MovieOnReturn(int[] genres, double voteAvg) {
-		super();
-		this.genres = genres;
-		this.voteAvg = voteAvg;
-	}
+	
 	public int getId(JSONObject s) {
 		return s.getInt("id");
 	}

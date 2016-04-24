@@ -2,9 +2,21 @@ package main.java;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
+/*
+ * MovieOnGet stores the json returned from the first request. I.E. the information about the movie searched for by the client. 
+ * The MovieOnGet stores lots of information about the search movie, and is used heavily for comparison when scoring. 
+ */
 public class MovieOnGet {
 	
+	/*
+	 * id		- The id provided by theMovieDB
+	 * genres	- A collection of genre ids associated with the movie
+	 * keywords	- A collection of keyword ids associated with the movie
+	 * voteAvg	- The score out of 10 given by users on average. Relates to how good the movie is.
+	 * actors	- A collection of actor ids associated with the movie
+	 * director	- The id of the director for the movie
+	 * writer	- The id of the writer for the movie
+	 */
 	private int id;
 	private int genres[];
 	private int keywords[];
@@ -32,16 +44,19 @@ public class MovieOnGet {
 	public int getId(JSONObject s) {
 		return s.getInt("id");
 	}
-	public int[] getGenres(JSONObject s, String queryString) {
-		int arr[] = new int[s.getJSONArray(queryString).length()];
-		for(int objLoop = 0; objLoop<s.getJSONArray(queryString).length(); objLoop++)
+	
+	//extract the genre ids from the json object
+	public int[] getGenres(JSONObject movieJson, String queryString) {
+		int arr[] = new int[movieJson.getJSONArray(queryString).length()];
+		for(int objLoop = 0; objLoop<movieJson.getJSONArray(queryString).length(); objLoop++)
 		{
-			arr[objLoop] = (int)s.getJSONArray(queryString).getJSONObject(objLoop).get("id");		
+			arr[objLoop] = (int)movieJson.getJSONArray(queryString).getJSONObject(objLoop).get("id");		
 		}
 		return arr;
 	}
-	public int[] getKeywords(JSONObject s, String queryString) {
-		JSONObject k = (JSONObject) s.get(queryString);
+	//extract the keyword ids from the json object
+	public int[] getKeywords(JSONObject movieJson, String queryString) {
+		JSONObject k = (JSONObject) movieJson.get(queryString);
 		int arr[] = new int[k.getJSONArray(queryString).length()];
 		for(int objLoop = 0; objLoop<k.getJSONArray(queryString).length(); objLoop++)
 		{
@@ -49,14 +64,15 @@ public class MovieOnGet {
 		}
 		return arr;
 	}
-	public double getVoteAvg(JSONObject s) {
-		return s.getDouble("vote_average");
+	//extract the average vote from the json object
+	public double getVoteAvg(JSONObject movieJson) {
+		return movieJson.getDouble("vote_average");
 	}
-	
-	public int[] getActor(JSONObject s)
+	//extract the actor ids from the json object
+	public int[] getActor(JSONObject movieJson)
 	{
 		int[] actors = new int[1];
-		JSONObject castArr = (JSONObject) s.get("credits");
+		JSONObject castArr = (JSONObject) movieJson.get("credits");
 		for(int actorLoop = 0; actorLoop<actors.length; actorLoop++)
 		{
 			JSONObject castObj = (JSONObject)castArr.getJSONArray("cast").get(actorLoop);
@@ -64,9 +80,10 @@ public class MovieOnGet {
 		}
 		return actors;
 	}
-	public int getDirector(JSONObject s) {
+	//extract the director id from the json object
+	public int getDirector(JSONObject movieJson) {
 		
-		JSONObject castArr = (JSONObject) s.get("credits");
+		JSONObject castArr = (JSONObject) movieJson.get("credits");
 		JSONArray c = (JSONArray)castArr.getJSONArray("crew");
 		for(int objLoop = 0; objLoop<c.length(); objLoop++)
 		{
@@ -77,9 +94,10 @@ public class MovieOnGet {
 		}
 		return -1;
 	}
-	public int getWriter(JSONObject s) {
+	//extract the writer id from the json object
+	public int getWriter(JSONObject movieJson) {
 			
-			JSONObject castArr = (JSONObject) s.get("credits");
+			JSONObject castArr = (JSONObject) movieJson.get("credits");
 			JSONArray c = (JSONArray)castArr.getJSONArray("crew");
 			for(int objLoop = 0; objLoop<c.length(); objLoop++)
 			{
@@ -90,6 +108,7 @@ public class MovieOnGet {
 			}
 			return -1;
 	}
+	//getters and setters
 	public int[] getGenres() {
 		return genres;
 	}

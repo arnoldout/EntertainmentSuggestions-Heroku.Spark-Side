@@ -1,10 +1,16 @@
 package main.java;
 
+/*
+ * Abstract class that defines variables for sub classes to use
+ * 	Sub classes are the KeywordsQuery class and the StaffQuery class.
+ */
 public abstract class QueryBuilder {
 
 	private String query;
+	//MovieOnGet refers to the movie requested by the client
 	private MovieOnGet movie;
 	private int pageNo;
+	//constructor
 	public QueryBuilder(MovieOnGet movie, int pageNo)
 	{
 		this.movie = movie;
