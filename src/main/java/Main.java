@@ -24,7 +24,7 @@ public class Main {
 	
     public static void main(String[] args) {
     	//set active port requests connect through
-    	//port(Integer.valueOf(System.getenv("PORT")));
+    	port(Integer.valueOf(System.getenv("PORT")));
     	
     	//basic help response to a blank call to the webpage
     	get("/", (request, response) -> 
